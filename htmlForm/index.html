@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Test</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Website</title>
+    <link rel="stylesheet" href="./test.css" />
+    <link rel="icon" href="./favicon.ico" type="image/x-icon" />
+  </head>
+
+  <body>
+    <main>
+      <h1>LiftFlow</h1>
+      <form name="submit-to-google-sheet" class="form-class" method="POST" action="https://script.google.com/macros/s/AKfycbyVQAiEU-lYCQAmcyzpRpOush7iJ89lW4Bl4iWGSHmehSllXrgQxSTNXVSv0tmOT5YJXw/exec" name="liftflow_form" onsubmit="return validateForm()">
+        <label for="Name">What is you name/alias?</label><br>
+        <input type="text" id="name" name="name" required><br>
+
+        <label for="Category">Select a category for your Liftflow:</label><br>
+        <input type="radio" id="category" name="category" value="career">
+        <label for="career">Career</label><br>
+        <input type="radio" id="category" name="category" value="social">
+        <label for="social">Social</label><br>
+        <input type="radio" id="category" name="category" value="financial">
+        <label for="financial">Financial</label><br>
+        
+        <label id="goal_label" for="goal">What do you what to achieve?</label><br>
+        <input type="text" id="goal" name="goal" onchange="onChange()"><br>
+
+        <label id="goal_how" for="h_goal" value="test">How will you achieve *your goal*?</label><br>
+        <input type="text" id="h_goal" name="h_goal" ><br>
+
+        <label class="test_class" for="Subgoal">What must happen in order to achieve your goal? *max 3 sub-goals*</label><br>
+        <div class="class2">
+          <input type="text" id="subgoal" name="subgoal" > 
+          <button type="button" id="button_subgoal" onclick="addBox()">Add</button> 
+          <button type="button" id="button_subgoal_clear" onclick="clearArray()">Clear</button> 
+          <button type="button" id="button_subgoal_last" onclick="deleteLast()">Delete last</button> 
+
+          <div class="class3 hide" id="subgoals_content"></div>
+        </div>
+
+        <br>
+
+        <input type="submit" value="Submit">
+      </form>
+
+      <div id="main_liftflow"></div>
+      <div></div>
+    </main>
+
+    <script src="test.js"></script>
+  </body>
+</html>
+
+<script>
+    let arr = []
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzhwv-5wGoHmDl6-gqBAtkSnr7kR1FJm_z75EsD3DQRQ51inVHn3IPA3L8j_Rv9WhDIKg/exec' //replace link by liftflow link
+    const form = document.forms['submit-to-google-sheet']
+
+    form.addEventListener('submit', e => {
+        e.preventDefault()
+        fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+        .then(response => console.log('Success!', response))
+        .catch(error => console.error('Error!', error.message))
+    })
+
+    const onChange = () => {
+      let label = document.getElementById('goal_how')
+      let input = document.getElementById('goal')
+      let extraInputs = document.getElementsByClassName('test_class');
+  
+      label.innerHTML = `How will you achieve: ${input.value}?`
+  
+      for (let i = 0; i < extraInputs.length; i++){
+        extraInputs[i].innerHTML = `What must happen in order to achieve  ${input.value}?`
+      }
+    }
+  
+    const addBox = () => {
+      let input = document.getElementById('subgoal')
+      let button = document.getElementById('button_subgoal')
+      document.getElementById('subgoals_content').classList.remove('hide')
+  
+      if (arr.length >= 3) return;
+      arr.push(input.value);
+  
+      let newHtml = arr.reduce((accumulated, item, index) => {
+        return (
+          accumulated +
+          `<input readonly="readonly" type="text" name="subgoal_${index}" class="arr_style inputs" value="${arr[index]}"></input>`
+        );
+      }, '');
+  
+      document.getElementById('subgoals_content').innerHTML = newHtml;
+    }
+  
+    const clearArray = () => {
+      arr = [];
+      console.log(arr)
+      document.getElementById('subgoals_content').classList.add('hide')
+      document.getElementById('subgoals_content').innerHTML = '';
+    }
+  
+    const deleteLast = () => {
+      arr.pop()
+  
+      let newHtml = arr.reduce((accumulated, item, index) => {
+        return (
+          accumulated +
+          `<div class="arr_style">${arr[index]}</div>`
+        );
+      }, '');
+  
+      document.getElementById('subgoals_content').innerHTML = newHtml;
+    }
+  </script>
